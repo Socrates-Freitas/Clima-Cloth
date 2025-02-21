@@ -13,3 +13,62 @@ datasource db {
         url      = env("DATABASE_URL")
 }
 
+model User {
+        id                          Int                           @id @default(autoincrement())
+        name                        String
+        email                       String                        @unique
+        hash                        String
+        salt                        String
+        cloths                      Cloth[]
+        userPosts                   UserPost[]
+        ForecastClothReccomendation ForecastClothReccomendation[]
+}
+
+model UserPost {
+        userId    Int
+        clothName String
+        user      User   @relation(fields: [userId], references: [id])
+        cloth     Cloth  @relation(fields: [userId, clothName], references: [userId, clothName])
+
+        date     DateTime @default(now())
+        postText String
+
+        @@id([userId, clothName, date])
+}
+
+model Cloth {
+        clothName  String @unique
+        userId     Int
+        clothType  Float
+        clothColor Float
+        imageUrl   String
+
+        user User @relation(fields: [userId], references: [id])
+
+        userPost              UserPost[]
+        forecastRecomendation ForecastClothReccomendation[]
+
+        @@id([userId, clothName])
+}
+
+model ForecastClothReccomendation {
+        clothName  String
+        userId     Int
+        forecastId Int
+        user       User     @relation(fields: [userId], references: [id])
+        forecast   Forecast @relation(fields: [forecastId], references: [id])
+        cloth      Cloth    @relation(fields: [clothName], references: [clothName])
+
+        @@id([clothName, forecastId])
+}
+
+model Forecast {
+        id              Int      @id @default(autoincrement())
+        city            String
+        date            DateTime
+        weather         String
+        temperature     Float
+        rainProbability Float
+
+        forecastRecommendation ForecastClothReccomendation[]
+}

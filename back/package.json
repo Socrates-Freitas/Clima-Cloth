@@ -6,7 +6,13 @@
     "schema": "src/models/schema.prisma"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx ts-node-dev --transpile-only --no-notify server.ts",
+    "keys": "npx ts-node src/config/generateRSAKeyPair.ts",
+    "reset": "npx prisma generate && npx prisma db push && npx prisma migrate reset",
+    "studio": "npx prisma studio",
+    "migrate": "npx prisma migrate dev --name init",
+    "seed": "npx prisma db seed"
   },
   "keywords": [],
   "author": "",
