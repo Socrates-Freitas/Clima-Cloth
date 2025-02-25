@@ -37,11 +37,12 @@ model UserPost {
 }
 
 model Cloth {
-        clothName  String @unique
-        userId     Int
-        clothType  Float
-        clothColor Float
-        imageUrl   String
+        clothName     String  @unique
+        userId        Int
+        clothCategory String
+        clothType     Float
+        clothColor    String
+        imageUrl      String?
 
         user User @relation(fields: [userId], references: [id])
 
