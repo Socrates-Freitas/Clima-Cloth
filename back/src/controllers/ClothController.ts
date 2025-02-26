@@ -9,6 +9,18 @@ export enum ClothCategory {
   CALCADO = "CALÇADO",
 }
 
+export enum ClothType {
+  CALCA_LONGA = 0.2,
+  CASACO = 0.2,
+  CALCA_CAPRI = 0.5,
+  MANGA_LONGA = 0.5,
+  MANGA_CURTA = 0.6,
+  REGATA = 1.0,
+  VESTIDO = 0.6,
+  BERMUDA = 0.6,
+  SHORT = 1.0,
+}
+
 export class ClothController {
   static async createCloth(request: Request, response: Response) {
     try {
@@ -106,7 +118,7 @@ export class ClothController {
         },
       });
 
-      response.status(201).json(updatedCLoth);
+      response.status(200).json(updatedCLoth);
     } catch (error: any) {
       response.status(500).json({ message: error.message });
     }
@@ -140,8 +152,4 @@ export class ClothController {
       response.status(500).json({ message: error.message });
     }
   }
-
-
-
-
 }
