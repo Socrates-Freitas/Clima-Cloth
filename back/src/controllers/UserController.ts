@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { warnEnvConflicts } from "@prisma/client/runtime/library";
 import { Request, Response } from "express";
 
 const prisma = new PrismaClient();

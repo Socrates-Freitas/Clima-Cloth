@@ -16,6 +16,9 @@ export class UserPostController {
 
       const createdUserPost = await prisma.userPost.create({
         data: userPostInput,
+        include: {
+          user: true,
+        },
       });
 
       response.status(201).json(createdUserPost);
@@ -32,6 +35,9 @@ export class UserPostController {
         where: {
           userId: typeof userId === "string" ? Number(userId) : undefined,
           clothName: typeof clothName === "string" ? clothName : undefined,
+        },
+        include: {
+          user: true,
         },
       });
 
@@ -57,6 +63,9 @@ export class UserPostController {
             date: date,
           },
         },
+        include: {
+          user: true,
+        },
       });
 
       response.status(200).json(updatedUserPost);
@@ -76,6 +85,9 @@ export class UserPostController {
             clothName: clothName,
             date: date,
           },
+        },
+        include: {
+          user: true,
         },
       });
       response.status(200).json(deletedUserPost);

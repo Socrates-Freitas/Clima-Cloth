@@ -59,37 +59,37 @@ export class ForecastReccomendationController {
       const forecastInfo: Forecast | null = await prisma.forecast.findUnique({
         where: { id: Number(forecastId) },
       });
-     
-      // const forecastReccomendationInput: Prisma.ForecastClothReccomendationCreateInput =
-      //   {
-      //     cloth: {
-      //       connect: { clothName: clothName },
-      //     },
-      //     forecast: {
-      //       connect: { id: Number(forecastId) },
-      //     },
-      //     user: {
-      //       connect: { id: Number(userId) },
-      //     },
-      //   };
 
       if (forecastInfo == null) {
         response.status(404).json({ message: "Forecast Not Found!" });
         return;
       }
-      const optimalClothNames = await this.getOptimalClothAttributeFromForecast(
-        Number(userId),
-        forecastInfo,
+      const optimalClothNames =
+        await ForecastReccomendationController.getOptimalClothAttributeFromForecast(
+          Number(userId),
+          forecastInfo,
+        );
+
+      const setReccomendationInput = optimalClothNames.map(
+        (clothName: string) => {
+          return {
+            clothName: clothName,
+            forecastId: forecastId,
+            userId: userId,
+          };
+        },
       );
 
-      const fullSetReccomendation = await prisma.cloth.findMany({
-        where: {
-          clothName: { in: optimalClothNames },
-        },
-        include: { forecastRecomendation: { select: { forecast: true } } },
-      });
+      const fullSetReccomendation =
+        await prisma.forecastClothReccomendation.createManyAndReturn({
+          data: setReccomendationInput,
+          include: {
+            user: true,
+            forecast: true,
+          },
+        });
 
-	response.status(200).json(fullSetReccomendation)
+      response.status(200).json(fullSetReccomendation);
     } catch (error: any) {
       response.status(500).json({ error: error.message });
     }
@@ -109,6 +109,10 @@ export class ForecastReccomendationController {
             clothName: typeof clothName === "string" ? clothName : undefined,
             forecastId:
               typeof forecastId === "string" ? Number(forecastId) : undefined,
+          },
+          include: {
+            user: true,
+            forecast: true,
           },
         });
 
@@ -146,6 +150,10 @@ export class ForecastReccomendationController {
               clothName: clothName,
               forecastId: Number(forecastId),
             },
+          },
+          include: {
+            user: true,
+            forecast: true,
           },
         });
 

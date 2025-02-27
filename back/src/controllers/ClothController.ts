@@ -19,6 +19,9 @@ export enum ClothType {
   VESTIDO = 0.6,
   BERMUDA = 0.6,
   SHORT = 1.0,
+  SANDALHA = 1.0,
+  SALAPATO = 0.5,
+  BOTA = 0.2,
 }
 
 export class ClothController {
@@ -126,7 +129,7 @@ export class ClothController {
 
   static async deleteCloth(request: Request, response: Response) {
     try {
-      const { userId, clothName } = request.body;
+      const { clothName } = request.body;
 
       const deletedCloth = await prisma.cloth.delete({
         where: {

@@ -10,10 +10,10 @@ export class ForecastController {
 
       const forecastInput: Prisma.ForecastCreateInput = {
         city: city,
-        date: new Date(date),
+        date: new Date(Number(date)),
         weather: weather,
-        temperature: temperature,
-        rainProbability: rainProbabilty,
+        temperature: Number(temperature),
+        rainProbability: Number(rainProbabilty),
       };
 
       const createdForecast = await prisma.forecast.create({
