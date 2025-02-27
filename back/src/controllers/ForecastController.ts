@@ -6,20 +6,40 @@ const prisma = new PrismaClient();
 export class ForecastController {
   static async createForecast(request: Request, response: Response) {
     try {
-      const { city, date, weather, temperature, rainProbabilty } = request.body;
+      const {
+        city,
+        date,
+        weather,
+        temperature,
+        rainProbabilty: rainProbability,
+      } = request.body;
 
       const forecastInput: Prisma.ForecastCreateInput = {
         city: city,
         date: new Date(Number(date)),
         weather: weather,
         temperature: Number(temperature),
-        rainProbability: Number(rainProbabilty),
+        rainProbability: Number(rainProbability),
       };
 
       const createdForecast = await prisma.forecast.create({
         data: forecastInput,
       });
       response.status(201).json(createdForecast);
+    } catch (error: any) {
+      response.status(500).json({ message: error.message });
+    }
+  }
+
+  static async getForecast(request: Request, response: Response) {
+    try {
+      const { forecastId } = request.params;
+      const forecasts = await prisma.forecast.findMany({
+        where: {
+          id: Number(forecastId),
+        },
+      });
+      response.status(201).json(forecasts);
     } catch (error: any) {
       response.status(500).json({ message: error.message });
     }

@@ -54,7 +54,7 @@ export class ForecastReccomendationController {
     response: Response,
   ) {
     try {
-      const { userId, forecastId, clothName } = request.body;
+      const { userId, forecastId } = request.body;
 
       const forecastInfo: Forecast | null = await prisma.forecast.findUnique({
         where: { id: Number(forecastId) },
