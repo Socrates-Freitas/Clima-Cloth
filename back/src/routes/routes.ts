@@ -1,4 +1,5 @@
 import { Router } from "express";
+import passport from "passport"
 import { UserController } from "../controllers/UserController";
 import { ClothController } from "../controllers/ClothController";
 import { ForecastReccomendationController } from "../controllers/ForecastReccomendationController";
@@ -9,43 +10,62 @@ import {
 	ForecastReccomendationValidator,
 	ForecastValidator,
 	UserPostValidator,
+    UserValidator,
 } from "../config/Validator";
 import { ValidatorResultMiddleware } from "../middlewares/ValidatorResultMiddleware";
 
 const routes = Router();
 
+
+
+const authenticate = passport.authenticate("jwt",{session:false})
+
+//Login
+routes.post("/login",UserController.login)
+
+
 // User Routes
 
-routes.post("/users", UserController.createUser);
+routes.post("/users",UserValidator.validateUser("create"), UserController.createUser);
+
 routes.get("/users", UserController.getUsers);
-routes.get("/user/:id", UserController.getUser);
-routes.put("/users", UserController.updateUser);
-routes.delete("/user/:id", UserController.deleteUser);
+
+routes.get("/user/:id",authenticate,UserValidator.validateUser("read"), UserController.getUser);
+
+routes.put("/users",authenticate,UserValidator.validateUser("update"), UserController.updateUser);
+
+routes.delete("/user/:id",UserValidator.validateUser("delete"), UserController.deleteUser);
+
 routes.delete("/users", UserController.deleteAllUsers);
 
 //Cloth Routes
 
 routes.post(
 	"/clothes",
+	authenticate,
 	ClothValidator.validateCloth("create"),
 	ValidatorResultMiddleware.validateResult,
 	ClothController.createCloth,
 );
-routes.get("/clothes", ClothController.getClothes);
+routes.get("/clothes", authenticate,ClothController.getClothes);
+routes.get("/clothes/all", ClothController.getAllClothes);
 routes.get(
 	"/cloth",
+	authenticate,
 	ClothValidator.validateCloth("read"),
 	ValidatorResultMiddleware.validateResult,
 	ClothController.getCloth,
 );
 routes.put(
 	"/clothes",
+	authenticate,
 	ClothValidator.validateCloth("update"),
 	ValidatorResultMiddleware.validateResult,
 	ClothController.updateCloth,
 );
 routes.delete(
 	"/cloth",
+	authenticate,
 	ClothValidator.validateCloth("delete"),
 	ValidatorResultMiddleware.validateResult,
 	ClothController.deleteCloth,
@@ -95,11 +115,13 @@ routes.delete("/forecasts", ForecastController.deleteAllForecasts);
 
 routes.post(
 	"/reccomendation",
+	authenticate,
 	ForecastReccomendationController.createForecastReccomendation,
 );
 
 routes.post(
 	"/reccomendation/set",
+	authenticate,
 	ForecastReccomendationValidator.validateForecastReccomendation(
 		"create-fullSet",
 	),
@@ -109,16 +131,19 @@ routes.post(
 
 routes.get(
 	"/reccomendation",
+	authenticate,
 	ForecastReccomendationController.getForecastReccomendations,
 );
 
 routes.put(
 	"/reccomendation",
+	authenticate,
 	ForecastReccomendationController.updateForecastReccomendation,
 );
 
 routes.delete(
 	"/reccomendation",
+	authenticate,
 	ForecastReccomendationController.deleteForecastReccomendation,
 );
 
@@ -131,6 +156,7 @@ routes.delete(
 
 routes.post(
 	"/userposts",
+	authenticate,
 	UserPostValidator.validateUserPost("create"),
 	ValidatorResultMiddleware.validateResult,
 	UserPostController.createUserPost,
@@ -138,6 +164,7 @@ routes.post(
 
 routes.get(
 	"/userposts",
+	authenticate,
 	UserPostValidator.validateUserPost("read"),
 	ValidatorResultMiddleware.validateResult,
 	UserPostController.getUserPosts,
@@ -145,6 +172,7 @@ routes.get(
 
 routes.put(
 	"/userposts",
+	authenticate,
 	UserPostValidator.validateUserPost("update"),
 	ValidatorResultMiddleware.validateResult,
 	UserPostController.updateUserPost,
@@ -152,6 +180,7 @@ routes.put(
 
 routes.delete(
 	"/userpost",
+	authenticate,
 	UserPostValidator.validateUserPost("delete"),
 	ValidatorResultMiddleware.validateResult,
 	UserPostController.deleteUserPost,

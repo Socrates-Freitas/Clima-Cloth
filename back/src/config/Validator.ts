@@ -274,8 +274,7 @@ export class UserPostValidator {
 			case "read":
 				return [
 					body("clothName")
-						.exists()
-						.withMessage("O campo clothName é obrigatório")
+						.optional()
 						.isLength({ min: 3, max: 30 })
 						.withMessage("O campo clothName deve ter entre 3 e 30 caracteres"),
 				];
