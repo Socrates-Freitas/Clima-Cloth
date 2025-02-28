@@ -19,6 +19,7 @@ model User {
         email                       String                        @unique
         hash                        String
         salt                        String
+        imgUrl                      String                        @default("")
         cloths                      Cloth[]
         userPosts                   UserPost[]
         ForecastClothReccomendation ForecastClothReccomendation[]
@@ -27,8 +28,8 @@ model User {
 model UserPost {
         userId    Int
         clothName String
-        user      User   @relation(fields: [userId], references: [id])
-        cloth     Cloth  @relation(fields: [userId, clothName], references: [userId, clothName])
+        user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+        cloth     Cloth  @relation(fields: [userId, clothName], references: [userId, clothName], onDelete: Cascade)
 
         date     DateTime @default(now())
         postText String
@@ -44,7 +45,7 @@ model Cloth {
         clothColor    String
         imageUrl      String?
 
-        user User @relation(fields: [userId], references: [id])
+        user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
         userPost              UserPost[]
         forecastRecomendation ForecastClothReccomendation[]
@@ -56,9 +57,9 @@ model ForecastClothReccomendation {
         clothName  String
         userId     Int
         forecastId Int
-        user       User     @relation(fields: [userId], references: [id])
-        forecast   Forecast @relation(fields: [forecastId], references: [id])
-        cloth      Cloth    @relation(fields: [clothName], references: [clothName])
+        user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+        forecast   Forecast @relation(fields: [forecastId], references: [id], onDelete: Cascade)
+        cloth      Cloth    @relation(fields: [clothName], references: [clothName], onDelete: Cascade)
 
         @@id([clothName, forecastId])
 }

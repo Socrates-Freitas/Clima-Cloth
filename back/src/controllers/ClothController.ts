@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 
 const prisma = new PrismaClient();
 
@@ -27,14 +27,26 @@ export enum ClothType {
 export class ClothController {
   static async createCloth(request: Request, response: Response) {
     try {
-      const { clothName, userId, clothCategory, clothType, clothColor } =
-        request.body;
+      const { clothName, clothCategory, clothType, clothColor } = request.body;
+
+      const userEmail = request.user as string;
+
+      if (!userEmail) {
+        response.status(401).json({ message: "Unauthorized!" });
+        return;
+      }
+
+      const user = await prisma.user.findUnique({
+        where: {
+          email: userEmail,
+        },
+      });
 
       const createClothInput: Prisma.ClothCreateInput = {
         clothName: clothName,
         user: {
           connect: {
-            id: Number(userId),
+            id: user?.id,
           },
         },
         clothCategory: clothCategory,
@@ -54,11 +66,18 @@ export class ClothController {
 
   static async getClothes(request: Request, response: Response) {
     try {
-      const { userId } = request.body;
+      const userEmail = request.user as string;
+
+      if (!userEmail) {
+        response.status(401).json({ message: "Unauthorized!" });
+        return;
+      }
 
       const clothes = await prisma.cloth.findMany({
         where: {
-          userId: typeof userId === "string" ? Number(userId) : undefined,
+          user: {
+            email: userEmail,
+          },
         },
       });
 
@@ -68,14 +87,33 @@ export class ClothController {
     }
   }
 
+  static async getAllClothes(request: Request, response: Response) {
+    try {
+      const clothes = await prisma.cloth.findMany();
+
+      response.status(200).json(clothes);
+    } catch (error: any) {
+      response.status(500).json({ message: error.message });
+    }
+  }
+
   static async getCloth(request: Request, response: Response) {
     try {
-      const { userId, clothName } = request.body;
+      const { clothName } = request.body;
+
+      const userEmail = request.user as string;
+
+      if (!userEmail) {
+        response.status(401).json({ message: "Unauthorized!" });
+        return;
+      }
 
       const cloth = await prisma.cloth.findUnique({
         where: {
-          userId: Number(userId),
           clothName: clothName,
+          user: {
+            email: userEmail,
+          },
         },
       });
 
@@ -92,8 +130,14 @@ export class ClothController {
 
   static async updateCloth(request: Request, response: Response) {
     try {
-      const { clothName, userId, clothCategory, clothType, clothColor } =
-        request.body;
+      const { clothName, clothCategory, clothType, clothColor } = request.body;
+
+      const userEmail = request.user as string;
+
+      if (!userEmail) {
+        response.status(401).json({ message: "Unauthorized!" });
+        return;
+      }
 
       const updateClothInput: Prisma.ClothUpdateInput = {
         clothName: clothName,
@@ -104,8 +148,10 @@ export class ClothController {
 
       const clothToBeUpdated = await prisma.cloth.findUnique({
         where: {
-          userId: Number(userId),
           clothName: clothName,
+          user: {
+            email: userEmail,
+          },
         },
       });
       if (!clothToBeUpdated) {
@@ -116,8 +162,10 @@ export class ClothController {
       const updatedCLoth = await prisma.cloth.update({
         data: updateClothInput,
         where: {
-          userId: Number(userId),
           clothName: clothName,
+          user: {
+            email: userEmail,
+          },
         },
       });
 
@@ -130,6 +178,13 @@ export class ClothController {
   static async deleteCloth(request: Request, response: Response) {
     try {
       const { clothName } = request.body;
+
+      const userEmail = request.user as string;
+
+      if (!userEmail) {
+        response.status(401).json({ message: "Unauthorized!" });
+        return;
+      }
 
       const deletedCloth = await prisma.cloth.delete({
         where: {

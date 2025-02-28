@@ -6,10 +6,28 @@ const prisma = new PrismaClient();
 export class UserPostController {
   static async createUserPost(request: Request, response: Response) {
     try {
-      const { userId, clothName, postText } = request.body;
+      const { clothName, postText } = request.body;
+
+      const userEmail = request.user as string;
+
+      if (!userEmail) {
+        response.status(401).json({ message: "Unauthorized!" });
+        return;
+      }
+
+      const user = await prisma.user.findUnique({
+        where: {
+          email: userEmail,
+        },
+      });
+
+      if (user == null) {
+        response.status(404).json({ message: "User Not Found" });
+        return;
+      }
 
       const userPostInput: Prisma.UserPostCreateManyInput = {
-        userId: Number(userId),
+        userId: user.id,
         clothName: clothName,
         postText: postText,
       };
@@ -17,7 +35,13 @@ export class UserPostController {
       const createdUserPost = await prisma.userPost.create({
         data: userPostInput,
         include: {
-          user: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+              imgUrl: true,
+            },
+          },
         },
       });
 
@@ -29,15 +53,29 @@ export class UserPostController {
 
   static async getUserPosts(request: Request, response: Response) {
     try {
-      const { userId, clothName } = request.body;
+      const { clothName } = request.body;
+      const userEmail = request.user as string;
+
+      if (!userEmail) {
+        response.status(401).json({ message: "Unauthorized!" });
+        return;
+      }
 
       const userPosts = await prisma.userPost.findMany({
         where: {
-          userId: typeof userId === "string" ? Number(userId) : undefined,
           clothName: typeof clothName === "string" ? clothName : undefined,
+          user: {
+            email: typeof userEmail === "string" ? userEmail : undefined,
+          },
         },
         include: {
-          user: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+              imgUrl: true,
+            },
+          },
         },
       });
 
@@ -48,7 +86,25 @@ export class UserPostController {
   }
   static async updateUserPost(request: Request, response: Response) {
     try {
-      const { userId, clothName, date, postText } = request.body;
+      const { clothName, date, postText } = request.body;
+
+      const userEmail = request.user as string;
+
+      if (!userEmail) {
+        response.status(401).json({ message: "Unauthorized!" });
+        return;
+      }
+
+      const user = await prisma.user.findUnique({
+        where: {
+          email: userEmail,
+        },
+      });
+
+      if (user == null) {
+        response.status(404).json({ message: "User Not Found" });
+        return;
+      }
 
       const userPostInput: Prisma.UserPostUpdateInput = {
         postText: postText,
@@ -58,13 +114,19 @@ export class UserPostController {
         data: userPostInput,
         where: {
           userId_clothName_date: {
-            userId: Number(userId),
             clothName: clothName,
             date: date,
+            userId: user.id,
           },
         },
         include: {
-          user: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+              imgUrl: true,
+            },
+          },
         },
       });
 
@@ -76,18 +138,42 @@ export class UserPostController {
 
   static async deleteUserPost(request: Request, response: Response) {
     try {
-      const { userId, clothName, date } = request.body;
+      const { clothName, date } = request.body;
+
+      const userEmail = request.user as string;
+
+      if (!userEmail) {
+        response.status(401).json({ message: "Unauthorized!" });
+        return;
+      }
+
+      const user = await prisma.user.findUnique({
+        where: {
+          email: userEmail,
+        },
+      });
+
+      if (user == null) {
+        response.status(404).json({ message: "User Not Found" });
+        return;
+      }
 
       const deletedUserPost = await prisma.userPost.delete({
         where: {
           userId_clothName_date: {
-            userId: Number(userId),
+            userId: user.id,
             clothName: clothName,
             date: date,
           },
         },
         include: {
-          user: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+              imgUrl: true,
+            },
+          },
         },
       });
       response.status(200).json(deletedUserPost);
