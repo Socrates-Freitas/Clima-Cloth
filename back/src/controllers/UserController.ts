@@ -4,6 +4,15 @@ import auth from "../config/auth";
 
 const prisma = new PrismaClient();
 
+export type UserReturn = {
+	id: number;
+	name: string;
+	email: string;
+	hash: string;
+	salt: string;
+	imgUrl: string;
+};
+
 export class UserController {
 	static async createUser(request: Request, response: Response) {
 		try {
@@ -11,7 +20,7 @@ export class UserController {
 
 			const { hash, salt } = auth.generatePassword(password);
 
-			const createdUser = await prisma.user.create({
+			const createdUser: UserReturn = await prisma.user.create({
 				data: {
 					name: name,
 					email: email,
